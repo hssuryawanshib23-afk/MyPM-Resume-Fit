@@ -1,3 +1,4 @@
+# Calls the Groq LLM to produce a structured resume-vs-job fit analysis
 import json
 import logging
 
@@ -9,8 +10,10 @@ from app.schemas import AnalysisRequest, LLMAnalysisOutput
 
 logger = logging.getLogger(__name__)
 
+# Retry once if the model returns invalid/incomplete structured output
 MAX_ATTEMPTS = 2
 
+# Instructions given to the model, including a prompt-injection guard for resume/JD content
 SYSTEM_PROMPT = """You are a recruiting analyst assistant. You compare a candidate's resume \
 against a job description and produce a grounded, structured fit assessment plus a short \
 outreach email.
@@ -42,6 +45,7 @@ things about the role that aren't in the job description.
 respond in plain text.
 """
 
+# Tool schema the model must call with its structured result
 ANALYSIS_TOOL = {
     "type": "function",
     "function": {
@@ -88,6 +92,7 @@ class LLMError(Exception):
     """Raised when the LLM call fails or never returns a valid structured result."""
 
 
+# Wrap request fields in XML-style tags so the model can distinguish data from instructions
 def _build_user_message(req: AnalysisRequest) -> str:
     return f"""<candidate_name>{req.candidate_name}</candidate_name>
 <target_role>{req.target_role}</target_role>
@@ -104,6 +109,7 @@ def _build_user_message(req: AnalysisRequest) -> str:
 Analyze the fit between this resume and this job description, then call submit_analysis."""
 
 
+# Pull and parse the submit_analysis tool call's JSON arguments from the model's reply
 def _extract_tool_arguments(message) -> dict:
     if not message.tool_calls:
         raise LLMError("Model did not return a submit_analysis tool call.")
@@ -114,6 +120,7 @@ def _extract_tool_arguments(message) -> dict:
         raise LLMError(f"Model returned malformed JSON arguments: {exc}") from exc
 
 
+# Main entry point: sends resume + job description to the LLM and returns validated output
 def run_resume_analysis(req: AnalysisRequest) -> LLMAnalysisOutput:
     if not settings.groq_api_key:
         raise LLMError(
@@ -130,6 +137,7 @@ def run_resume_analysis(req: AnalysisRequest) -> LLMAnalysisOutput:
     ]
     last_error: Exception | None = None
 
+    # Try up to MAX_ATTEMPTS times, feeding back errors if the model's output is invalid
     for attempt in range(1, MAX_ATTEMPTS + 1):
         try:
             response = client.chat.completions.create(
@@ -154,6 +162,7 @@ def run_resume_analysis(req: AnalysisRequest) -> LLMAnalysisOutput:
             last_error = exc
             logger.warning("Attempt %s: invalid structured output from model: %s", attempt, exc)
             if attempt < MAX_ATTEMPTS:
+                # Feed the failed attempt back to the model so it can retry with corrections
                 messages.append(message.model_dump(exclude_none=True))
                 messages.append(
                     {

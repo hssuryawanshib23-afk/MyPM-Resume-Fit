@@ -1,3 +1,4 @@
+// API client: types and fetch wrappers for talking to the backend
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
 export type FitCategory = "Strong Fit" | "Good Fit" | "Partial Fit" | "Not a Fit";
@@ -35,6 +36,7 @@ export interface AnalysisDetail extends AnalysisSummary {
   outreach_email: string;
 }
 
+// Thrown for any failed request, carrying the HTTP status for callers to inspect
 export class ApiError extends Error {
   status: number;
 
@@ -44,6 +46,7 @@ export class ApiError extends Error {
   }
 }
 
+// Shared fetch wrapper: sets JSON headers, parses error details, and JSON-decodes the response
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
@@ -73,6 +76,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+// Submit a new resume/job pair for LLM analysis
 export function createAnalysis(payload: AnalysisRequest): Promise<AnalysisDetail> {
   return request<AnalysisDetail>("/api/analyses", {
     method: "POST",
@@ -80,14 +84,17 @@ export function createAnalysis(payload: AnalysisRequest): Promise<AnalysisDetail
   });
 }
 
+// Fetch the history list (summaries only)
 export function listAnalyses(): Promise<AnalysisSummary[]> {
   return request<AnalysisSummary[]>("/api/analyses");
 }
 
+// Fetch one analysis's full detail by id
 export function getAnalysis(id: number): Promise<AnalysisDetail> {
   return request<AnalysisDetail>(`/api/analyses/${id}`);
 }
 
+// Save edits to the generated outreach email
 export function updateOutreachEmail(id: number, outreach_email: string): Promise<AnalysisDetail> {
   return request<AnalysisDetail>(`/api/analyses/${id}/outreach`, {
     method: "PATCH",

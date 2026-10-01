@@ -1,3 +1,4 @@
+# ORM model for a stored resume-fit analysis
 import datetime
 import json
 
@@ -31,6 +32,7 @@ class Analysis(Base):
 
     outreach_email: Mapped[str] = mapped_column(Text)
 
+    # Expose the JSON-backed columns as plain Python lists
     @property
     def matching_qualifications(self) -> list:
         return json.loads(self.matching_qualifications_json or "[]")

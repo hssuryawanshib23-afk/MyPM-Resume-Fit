@@ -5,10 +5,12 @@ import Link from "next/link";
 import { ApiError, listAnalyses, type AnalysisSummary } from "@/lib/api";
 import FitBadge from "@/components/FitBadge";
 
+// History page: lists all past analyses, linking to each detail page
 export default function HistoryPage() {
   const [analyses, setAnalyses] = useState<AnalysisSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Load the analysis list once on mount
   useEffect(() => {
     listAnalyses()
       .then(setAnalyses)

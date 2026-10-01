@@ -1,3 +1,4 @@
+// Next.js build/runtime configuration
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {

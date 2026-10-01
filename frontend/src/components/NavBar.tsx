@@ -1,3 +1,4 @@
+// Top site header with links to the new-analysis and history pages
 import Link from "next/link";
 
 export default function NavBar() {

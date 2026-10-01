@@ -1,5 +1,7 @@
+// Colored pill showing an overall fit category
 import type { FitCategory } from "@/lib/api";
 
+// Tailwind classes per fit category
 const STYLES: Record<FitCategory, string> = {
   "Strong Fit": "bg-emerald-100 text-emerald-800 border-emerald-300",
   "Good Fit": "bg-blue-100 text-blue-800 border-blue-300",

@@ -5,11 +5,13 @@ import AnalysisForm from "@/components/AnalysisForm";
 import AnalysisResult from "@/components/AnalysisResult";
 import { ApiError, createAnalysis, type AnalysisDetail, type AnalysisRequest } from "@/lib/api";
 
+// Home page: analysis form on top, result panel below once submitted
 export default function HomePage() {
   const [result, setResult] = useState<AnalysisDetail | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Submit the form to the API and show the result or an error
   async function handleSubmit(data: AnalysisRequest) {
     setSubmitting(true);
     setError(null);

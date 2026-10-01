@@ -1,5 +1,6 @@
 "use client";
 
+// Displays a completed fit analysis: badge, explanation, matches/gaps, and an editable outreach email
 import { useState } from "react";
 import type { AnalysisDetail } from "@/lib/api";
 import { updateOutreachEmail } from "@/lib/api";
@@ -10,6 +11,7 @@ export default function AnalysisResult({ analysis }: { analysis: AnalysisDetail 
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [copyState, setCopyState] = useState<"idle" | "copied">("idle");
 
+  // Persist the (possibly edited) outreach email back to the API
   async function handleSave() {
     setSaveState("saving");
     try {
@@ -21,6 +23,7 @@ export default function AnalysisResult({ analysis }: { analysis: AnalysisDetail 
     }
   }
 
+  // Copy the outreach email text to the clipboard
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(outreach);

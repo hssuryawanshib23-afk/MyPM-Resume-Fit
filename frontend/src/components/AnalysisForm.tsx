@@ -1,8 +1,10 @@
 "use client";
 
+// Form for entering candidate resume + job description, with client-side validation
 import { useState } from "react";
 import type { AnalysisRequest } from "@/lib/api";
 
+// Initial/empty form values
 const EMPTY: AnalysisRequest = {
   candidate_name: "",
   target_role: "",
@@ -12,6 +14,7 @@ const EMPTY: AnalysisRequest = {
   job_description: "",
 };
 
+// Human-readable label per field
 const FIELD_LABELS: Record<keyof AnalysisRequest, string> = {
   candidate_name: "Candidate name",
   target_role: "Target role",
@@ -21,6 +24,7 @@ const FIELD_LABELS: Record<keyof AnalysisRequest, string> = {
   job_description: "Job description",
 };
 
+// Minimum character count required per field (defaults to 1 if unset)
 const MIN_LENGTHS: Partial<Record<keyof AnalysisRequest, number>> = {
   resume_text: 20,
   job_description: 20,
@@ -36,6 +40,7 @@ export default function AnalysisForm({
   const [values, setValues] = useState<AnalysisRequest>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof AnalysisRequest, string>>>({});
 
+  // Check all fields against required/min-length rules, storing any error messages
   function validate(): boolean {
     const nextErrors: Partial<Record<keyof AnalysisRequest, string>> = {};
     (Object.keys(EMPTY) as (keyof AnalysisRequest)[]).forEach((key) => {
@@ -55,6 +60,7 @@ export default function AnalysisForm({
     setValues((prev) => ({ ...prev, [key]: value }));
   }
 
+  // Validate before calling the parent's onSubmit handler
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (validate()) {
@@ -62,6 +68,7 @@ export default function AnalysisForm({
     }
   }
 
+  // Input border turns red when a field has a validation error
   const inputClass = (key: keyof AnalysisRequest) =>
     `w-full rounded-md border p-2 text-sm text-gray-900 focus:outline-none ${
       errors[key] ? "border-red-400" : "border-gray-300 focus:border-gray-500"

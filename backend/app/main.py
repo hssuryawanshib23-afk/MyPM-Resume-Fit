@@ -1,3 +1,4 @@
+# FastAPI app: routes for creating, listing, and viewing resume-fit analyses
 import logging
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -19,10 +20,12 @@ from app.schemas import (
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Create tables on startup if they don't already exist
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="MyPM Resume-Fit Assessment API")
 
+# Allow the frontend origin(s) to call this API from the browser
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
@@ -32,6 +35,7 @@ app.add_middleware(
 )
 
 
+# Convert an ORM row into the API's detail response shape
 def _to_detail(analysis: Analysis) -> AnalysisDetail:
     return AnalysisDetail(
         id=analysis.id,
@@ -50,6 +54,7 @@ def _to_detail(analysis: Analysis) -> AnalysisDetail:
     )
 
 
+# Fetch an analysis by id or raise a 404
 def _get_or_404(db: Session, analysis_id: int) -> Analysis:
     analysis = db.get(Analysis, analysis_id)
     if analysis is None:
@@ -62,6 +67,7 @@ def health() -> dict:
     return {"status": "ok"}
 
 
+# Run the LLM analysis for a new resume/job pair and persist the result
 @app.post("/api/analyses", response_model=AnalysisDetail)
 def create_analysis(req: AnalysisRequest, db: Session = Depends(get_db)):
     try:
@@ -91,16 +97,19 @@ def create_analysis(req: AnalysisRequest, db: Session = Depends(get_db)):
     return _to_detail(analysis)
 
 
+# List all past analyses, newest first
 @app.get("/api/analyses", response_model=list[AnalysisSummary])
 def list_analyses(db: Session = Depends(get_db)):
     return db.query(Analysis).order_by(desc(Analysis.created_at)).all()
 
 
+# Fetch one analysis's full detail
 @app.get("/api/analyses/{analysis_id}", response_model=AnalysisDetail)
 def get_analysis(analysis_id: int, db: Session = Depends(get_db)):
     return _to_detail(_get_or_404(db, analysis_id))
 
 
+# Let the recruiter edit the generated outreach email after the fact
 @app.patch("/api/analyses/{analysis_id}/outreach", response_model=AnalysisDetail)
 def update_outreach(analysis_id: int, req: OutreachUpdateRequest, db: Session = Depends(get_db)):
     analysis = _get_or_404(db, analysis_id)

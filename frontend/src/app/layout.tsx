@@ -1,3 +1,4 @@
+// Root layout: shared HTML shell, fonts, and nav bar for every page
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import NavBar from "@/components/NavBar";

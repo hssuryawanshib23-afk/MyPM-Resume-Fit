@@ -1,3 +1,4 @@
+# App configuration, loaded from environment variables / .env
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,7 +12,9 @@ class Settings(BaseSettings):
 
     @property
     def cors_origin_list(self) -> list[str]:
+        # Split the comma-separated CORS_ORIGINS env value into a list
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
 
+# Single shared settings instance used across the app
 settings = Settings()

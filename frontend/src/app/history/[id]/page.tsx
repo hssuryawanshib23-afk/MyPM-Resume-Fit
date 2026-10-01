@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ApiError, getAnalysis, type AnalysisDetail } from "@/lib/api";
 import AnalysisResult from "@/components/AnalysisResult";
 
+// History detail page: shows one past analysis by id from the URL
 export default function HistoryDetailPage({
   params,
 }: {
@@ -14,6 +15,7 @@ export default function HistoryDetailPage({
   const [analysis, setAnalysis] = useState<AnalysisDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Load the analysis whenever the id in the URL changes
   useEffect(() => {
     getAnalysis(Number(id))
       .then(setAnalysis)
